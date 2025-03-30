@@ -22,12 +22,15 @@ $dice = new Dice();
 $app->get('/{version}/[{anything}]', function (Request $request, Response $response) use ($logger, $dice) {
     $params = $request->getQueryParams();
 
+    $rolls = 1;
     if(isset($params['rolls'])) {
-        $result = $dice->roll($params['rolls']);
-        $response->getBody()->write(json_encode($result));
-    } else {
-        $response->withStatus(400)->getBody()->write("Please enter a number of rolls");
-    }
+        $rolls = intval($params['rolls']);
+    } 
+
+    $load = $params['load'] ?? '';
+
+    $result = $dice->roll($rolls, $load);
+    $response->getBody()->write(json_encode($result));
 
     return $response;
 });

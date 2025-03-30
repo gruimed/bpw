@@ -18,7 +18,9 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("mysql:mysql-connector-java:8.0.19") 
 }
 

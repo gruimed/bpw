@@ -8,6 +8,9 @@ services:
     hostname: web
     volumes:
       - ./nginx/nginx-config.conf:/etc/nginx/conf.d/default.conf
+    sysctls:
+      net.ipv4.ip_local_port_range: "10240 65535"
+
     depends_on:
       - php-fpm
       - java-service
@@ -23,8 +26,9 @@ services:
     build:
       context: go-service
       dockerfile: Dockerfile
-    ports: 
-      - "8080:8080"
+
+    sysctls:
+      net.ipv4.ip_local_port_range: "10240 65535"
 
   php-composer:
     image: composer/composer:latest
@@ -37,6 +41,9 @@ services:
       context: PHPFpm
       dockerfile: Dockerfile
     hostname: phpfpm
+    sysctls:
+      net.ipv4.ip_local_port_range: "10240 65535"
+
     volumes:
       - ./www:/usr/share/www
       - ./PHPFpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
