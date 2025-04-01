@@ -46,7 +46,7 @@ services:
 
     volumes:
       - ./www:/usr/share/www
-      - ./PHPFpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
+#      - ./PHPFpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
       - ./PHPFpm/docker.conf:/usr/local/etc/php-fpm.d/docker.conf
 
     depends_on:
