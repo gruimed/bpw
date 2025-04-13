@@ -13,7 +13,13 @@ import (
 
 	"strconv"
 
+	"go.opentelemetry.io/otel"
+
 	_ "github.com/go-sql-driver/mysql"
+)
+
+var (
+	tracer = otel.Tracer("otel-go-example")
 )
 
 func rolldice(w http.ResponseWriter, r *http.Request) {
@@ -84,5 +90,9 @@ func rollonce(ctx context.Context, load string) int {
 
 	}
 
-	return rand.Intn(6) + 1
+	_, span := tracer.Start(ctx, "getRandom")
+	random := rand.Intn(6) + 1
+	span.End()
+
+	return random
 }

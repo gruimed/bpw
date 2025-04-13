@@ -1,11 +1,15 @@
 <?php
 
+use OpenTelemetry\API\Globals;
 use GuzzleHttp\Client;
 
 class Dice {
 
+    private $tracer;
 
     function __construct() {
+        $tracerProvider = Globals::tracerProvider();
+        $this->tracer = $tracerProvider->getTracer('otel-php-demo');
     }
 
     public function roll(int $rolls, string $load) {
@@ -36,7 +40,9 @@ class Dice {
             $res->fetch_row();
         }
 
+//        $span = $this->tracer->spanBuilder("getRandom")->startSpan();
         $result = random_int(1, 6);
+//        $span->end();
         return $result;
     }
 }

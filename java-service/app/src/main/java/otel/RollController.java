@@ -29,9 +29,14 @@ import java.sql.Statement;
 import java.io.IOException;
 import java.lang.InterruptedException;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.Span;
+
 @RestController
 public class RollController {
 private static final Logger logger = LoggerFactory.getLogger(RollController.class);
+private static final Tracer tracer = GlobalOpenTelemetry.get().getTracerProvider().tracerBuilder("java-service-random").build();
 
   @GetMapping("/rolldice")
   public String index(@RequestParam("rolls") Optional<Integer> rolls, @RequestParam("load") Optional<String> load) {
@@ -50,7 +55,13 @@ private static final Logger logger = LoggerFactory.getLogger(RollController.clas
   }
 
   public Integer getRandomNumber(int min, int max) {
-    return ThreadLocalRandom.current().nextInt(min, max + 1);
+
+//    var span = tracer.spanBuilder("getRandom").startSpan();
+
+    Integer result = ThreadLocalRandom.current().nextInt(min, max + 1);
+
+//    span.end();
+    return result;
   }
 
   private Integer rollonce(Optional<String> load) {

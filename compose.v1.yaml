@@ -34,7 +34,9 @@ services:
     image: composer/composer:latest
     volumes:
       - ./www:/app
-    command: /bin/bash -c "env composer update --ignore-platform-reqs"
+      - ./PHPFpm/composer.v1.json:/app/composer.json
+
+    command: /bin/bash -c "composer update --ignore-platform-reqs"
 
   php-fpm:
     build:
@@ -46,7 +48,8 @@ services:
 
     volumes:
       - ./www:/usr/share/www
-#      - ./PHPFpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
+      - ./PHPFpm/composer.v1.json:/app/composer.json
+      - ./PHPFpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
       - ./PHPFpm/docker.conf:/usr/local/etc/php-fpm.d/docker.conf
 
     depends_on:
