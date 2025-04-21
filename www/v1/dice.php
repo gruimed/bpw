@@ -40,9 +40,12 @@ class Dice {
             $res->fetch_row();
         }
 
-//        $span = $this->tracer->spanBuilder("getRandom")->startSpan();
+
+        $span = $this->tracer
+            ->spanBuilder("getRandom")
+            ->startSpan();
         $result = random_int(1, 6);
-//        $span->end();
+        $span->end();
         return $result;
     }
 }

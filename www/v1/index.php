@@ -11,6 +11,7 @@ use Monolog\Handler\StreamHandler;
 require __DIR__ . '/../vendor/autoload.php';
 
 require('dice.php');
+#require('otel.php');
 
 $logger = new Logger('dice-server');
 $logger->pushHandler(new StreamHandler('php://stdout', Level::Error));
@@ -19,7 +20,7 @@ $app = AppFactory::create();
 
 $dice = new Dice();
 
-$app->get('/{version}/[{anything}]', function (Request $request, Response $response) use ($logger, $dice) {
+$handler = function (Request $request, Response $response) use ($logger, $dice) {
     $params = $request->getQueryParams();
 
     $rolls = 1;
@@ -33,6 +34,9 @@ $app->get('/{version}/[{anything}]', function (Request $request, Response $respo
     $response->getBody()->write(json_encode($result));
 
     return $response;
-});
+};
+
+$app->get('/v1/{_}', $handler);
+$app->get('/v2/{_}', $handler);
 
 $app->run();
