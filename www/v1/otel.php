@@ -10,6 +10,7 @@ use OpenTelemetry\Contrib\Otlp\SpanExporterFactory;
 require __DIR__ . '/../vendor/autoload.php';
 
 require 'MySpanProcessor.php';
+require 'PinbaSpanProcessor.php';
 
 $spanExporter = (new SpanExporterFactory())->create();
 
@@ -21,6 +22,8 @@ $tracerProvider = TracerProvider::builder()
         )
     )->addSpanProcessor(
         new MySpanProcessor(),
+    )->addSpanProcessor(
+        new PinbaSpanProcessor(),
     )
     ->build();
 
