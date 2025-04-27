@@ -144,7 +144,7 @@ exporters:
   otlphttp:
     endpoint: "https://otlp.eu01.nr-data.net"
     headers:
-      api-key: "eu01xxa77d01557660f9822f1b0a4cb0FFFFNRAL"
+      api-key: "<api-key>"
       
 
 service:
