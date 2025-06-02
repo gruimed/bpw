@@ -29,14 +29,12 @@ import java.sql.Statement;
 import java.io.IOException;
 import java.lang.InterruptedException;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.api.trace.Span;
+import java.lang.Thread;
 
 @RestController
 public class RollController {
 private static final Logger logger = LoggerFactory.getLogger(RollController.class);
-private static final Tracer tracer = GlobalOpenTelemetry.get().getTracerProvider().tracerBuilder("java-service-random").build();
+private static final HttpClient client  = HttpClient.newBuilder().version(Version.HTTP_1_1).build();
 
   @GetMapping("/rolldice")
   public String index(@RequestParam("rolls") Optional<Integer> rolls, @RequestParam("load") Optional<String> load) {
@@ -56,15 +54,21 @@ private static final Tracer tracer = GlobalOpenTelemetry.get().getTracerProvider
 
   public Integer getRandomNumber(int min, int max) {
 
-//    var span = tracer.spanBuilder("getRandom").startSpan();
-
     Integer result = ThreadLocalRandom.current().nextInt(min, max + 1);
 
-//    span.end();
     return result;
   }
 
   private Integer rollonce(Optional<String> load) {
+
+
+    if (load.isPresent() && load.get().indexOf('S') > -1) {
+      try {
+        Thread.sleep(10);
+      } catch (InterruptedException e) {
+        
+      }
+    }
 
     if (load.isPresent() && load.get().indexOf('C') > -1) {
       int[] arr = new int[1000000];
@@ -80,10 +84,6 @@ private static final Tracer tracer = GlobalOpenTelemetry.get().getTracerProvider
     if (load.isPresent() && load.get().indexOf('E') > -1) {
       try {
         HttpRequest request = HttpRequest.newBuilder(new URI("http://echo-service:8088/payload?io_msec=10")).build();
-        HttpClient client = HttpClient.newBuilder()
-        .version(Version.HTTP_1_1)
-        .build();
-
         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
       } catch (URISyntaxException e) {
 
