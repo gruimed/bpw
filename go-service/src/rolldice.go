@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
 	"net/http"
-	"sort"
+	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"strconv"
@@ -19,6 +21,14 @@ import (
 var (
 	client = http.Client{Timeout: time.Duration(1) * time.Second}
 )
+
+const elementsCount = 1_000_000
+
+var arrPool = sync.Pool{
+	New: func() any {
+		return make([]int, elementsCount)
+	},
+}
 
 func rolldice(w http.ResponseWriter, r *http.Request) {
 
@@ -31,15 +41,13 @@ func rolldice(w http.ResponseWriter, r *http.Request) {
 
 	load := r.URL.Query().Get("load")
 
-	resp := ""
-
+	resp := make([]int, rolls)
 	for rolls > 0 {
-		roll := rollonce(ctx, load)
-		resp = resp + strconv.Itoa(roll) + "\n"
+		resp = append(resp, rollonce(ctx, load))
 		rolls--
 	}
 
-	if _, err := io.WriteString(w, resp); err != nil {
+	if _, err := io.WriteString(w, fmt.Sprintf("%v", resp)); err != nil {
 		log.Printf("Write failed: %v\n", err)
 	}
 }
@@ -47,11 +55,12 @@ func rolldice(w http.ResponseWriter, r *http.Request) {
 func rollonce(ctx context.Context, load string) int {
 
 	if strings.Contains(load, "C") {
-		arr := make([]int, 1_000_000)
-		for i := range arr {
-			arr[i] = 1_000_000 - i
+		arr := arrPool.Get().([]int)
+		for i := 0; i < elementsCount; i++ {
+			arr[i] = elementsCount - i
 		}
-		sort.Ints(arr)
+		slices.Sort(arr)
+		arrPool.Put(arr)
 	}
 
 	if strings.Contains(load, "E") {

@@ -15,7 +15,7 @@ import (
 
 func main() {
 
-	runtime.GOMAXPROCS(32)
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	//http.HandleFunc("/rolldice", rolldice)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
