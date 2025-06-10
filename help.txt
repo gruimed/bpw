@@ -1,6 +1,10 @@
 sudo docker run --rm --network bpw_default skandyla/wrk -d 300  -c 20 -t 5 'http://web/v1/index.php?rolls=1&load=C'
 
 
+      - ./PHPFpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
+      - ./PHPFpm/docker.conf:/usr/local/etc/php-fpm.d/docker.conf
+
+
 SELECT DISTINCT JSONExtractString(labels, 'operation') AS operation
 FROM signoz_metrics.distributed_time_series_v4_1day
 WHERE 

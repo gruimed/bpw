@@ -11,6 +11,8 @@ use Monolog\Handler\StreamHandler;
 require __DIR__ . '/../vendor/autoload.php';
 
 require('dice.php');
+//require('otel.php');
+
 
 $logger = new Logger('dice-server');
 $logger->pushHandler(new StreamHandler('php://stdout', Level::Error));

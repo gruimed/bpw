@@ -32,7 +32,7 @@ services:
   go-service:
     build:
       context: go-service
-      dockerfile: Dockerfile.v2
+      dockerfile: Dockerfile
     privileged: true
     pid: "host"
 

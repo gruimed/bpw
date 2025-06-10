@@ -31,10 +31,17 @@ import java.lang.InterruptedException;
 
 import java.lang.Thread;
 
+//import io.opentelemetry.api.OpenTelemetry;
+//import io.opentelemetry.api.trace.Tracer;
+//import io.opentelemetry.api.trace.Span;
+
 @RestController
 public class RollController {
 private static final Logger logger = LoggerFactory.getLogger(RollController.class);
 private static final HttpClient client  = HttpClient.newBuilder().version(Version.HTTP_1_1).build();
+
+//private static final OpenTelemetry openTelemetry = ExampleConfiguration.initOpenTelemetry();
+//private static final Tracer tracer = openTelemetry.getTracer("myjava_otel");
 
   @GetMapping("/rolldice")
   public String index(@RequestParam("rolls") Optional<Integer> rolls, @RequestParam("load") Optional<String> load) {
@@ -54,7 +61,9 @@ private static final HttpClient client  = HttpClient.newBuilder().version(Versio
 
   public Integer getRandomNumber(int min, int max) {
 
+//    Span span = tracer.spanBuilder("getRandom").startSpan();
     Integer result = ThreadLocalRandom.current().nextInt(min, max + 1);
+//    span.end();
 
     return result;
   }

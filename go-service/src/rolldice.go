@@ -16,6 +16,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+var (
+	client = http.Client{Timeout: time.Duration(1) * time.Second}
+)
+
 func rolldice(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
@@ -58,7 +62,7 @@ func rollonce(ctx context.Context, load string) int {
 			return 0
 		}
 
-		client := http.Client{Timeout: time.Duration(1) * time.Second}
+		//		client := http.Client{Timeout: time.Duration(1) * time.Second}
 		res, err := client.Do(req)
 		if err != nil {
 			log.Printf("Get failed: %v\n", err)
