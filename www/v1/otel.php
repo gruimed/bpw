@@ -8,6 +8,7 @@ use OpenTelemetry\API\Common\Time\Clock;
 use OpenTelemetry\Contrib\Otlp\SpanExporterFactory;
 
 require __DIR__ . '/../vendor/autoload.php';
+//require 'MySpanProcessor.php';
 
 $spanExporter = (new SpanExporterFactory())->create();
 
@@ -18,6 +19,9 @@ $tracerProvider = TracerProvider::builder()
             Clock::getDefault()
         )
     )
+//    ->addSpanProcessor(
+//        new MySpanProcessor(),
+//    )
     ->build();
 
 
