@@ -49,7 +49,9 @@ func setupOTelSDK(ctx context.Context) (shutdown func(context.Context) error, er
 		return
 	}
 	shutdownFuncs = append(shutdownFuncs, tracerProvider.Shutdown)
-	otel.SetTracerProvider(tracerProvider)
+
+	tracerProvider.RegisterSpanProcessor(mySpanProcessor{})
+	otel.SetTracerProvider(MyTracerProvider{tracerProvider})
 
 	return
 }
