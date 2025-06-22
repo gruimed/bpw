@@ -66,6 +66,9 @@ processors:
     send_batch_max_size: 11000
     timeout: 10s
 
+#  probabilistic_sampler:
+#    sampling_percentage: 10
+
   signozspanmetrics/cumulative:
     metrics_exporter: clickhousemetricswrite
     metrics_flush_interval: 10s
@@ -137,6 +140,7 @@ service:
   pipelines:
     traces:
       receivers: [jaeger, otlp]
+#      processors: [signozspanmetrics/cumulative, signozspanmetrics/delta, probabilistic_sampler, batch]
       processors: [signozspanmetrics/cumulative, signozspanmetrics/delta, batch]
       exporters: [clickhousetraces]
     metrics:
