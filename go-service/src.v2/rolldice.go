@@ -18,6 +18,9 @@ import (
 	"go.opentelemetry.io/otel"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"go.nhat.io/otelsql"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 const elementsCount = 1_000_000
@@ -74,7 +77,10 @@ func rollonce(ctx context.Context, load string) int {
 			return 0
 		}
 
-		client := http.Client{Timeout: time.Duration(1) * time.Second}
+		client := http.Client{
+			Timeout:   time.Duration(1) * time.Second,
+			Transport: otelhttp.NewTransport(http.DefaultTransport),
+		}
 		res, err := client.Do(req)
 		if err != nil {
 			log.Printf("Get failed: %v\n", err)
@@ -84,8 +90,22 @@ func rollonce(ctx context.Context, load string) int {
 	}
 
 	if strings.Contains(load, "D") {
+		driverName, err := otelsql.Register("mysql",
+			otelsql.AllowRoot(),
+			otelsql.TraceQueryWithoutArgs(),
+			otelsql.TracePing(),
+			otelsql.TraceRowsNext(),
+			otelsql.TraceRowsClose(),
+			otelsql.TraceRowsAffected(),
+			otelsql.TraceLastInsertID(),
+			otelsql.WithDatabaseName("my_database"), // Optional.
+		)
+		if err != nil {
+			panic(err.Error())
+		}
+
 		dsn := "root:@tcp(pinba:3306)/pinba"
-		db, err := sql.Open("mysql", dsn)
+		db, err := sql.Open(driverName, dsn)
 		if err != nil {
 			panic(err.Error())
 		}

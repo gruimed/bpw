@@ -36,7 +36,7 @@ func (wt *myTracer) Start(ctx context.Context, name string, opts ...trace.SpanSt
 			},
 		}
 
-		serviceEndpoint := ""
+		serviceEndpoint := "not-set"
 
 		if oldData, ok := isSet.(*ParentSpanData); ok {
 			set := attribute.NewSet(oldData.Attributes...)
@@ -44,6 +44,7 @@ func (wt *myTracer) Start(ctx context.Context, name string, opts ...trace.SpanSt
 			serviceEndpoint = val.AsString()
 		}
 
+		// Pay attention that otel libs can mix span kinds.
 		if cfg.SpanKind() == trace.SpanKindServer {
 			serviceEndpoint = name
 		}
