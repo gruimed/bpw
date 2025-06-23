@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
 	"net/http"
-	"sort"
+	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"strconv"
@@ -16,10 +18,21 @@ import (
 	"go.opentelemetry.io/otel"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"go.nhat.io/otelsql"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
+
+const elementsCount = 1_000_000
 
 var (
 	tracer = otel.Tracer("otel-go-example")
+
+	arrPool = sync.Pool{
+		New: func() any {
+			return make([]int, elementsCount)
+		},
+	}
 )
 
 func rolldice(w http.ResponseWriter, r *http.Request) {
@@ -33,15 +46,14 @@ func rolldice(w http.ResponseWriter, r *http.Request) {
 
 	load := r.URL.Query().Get("load")
 
-	resp := ""
+	resp := make([]int, rolls)
 
 	for rolls > 0 {
-		roll := rollonce(ctx, load)
-		resp = resp + strconv.Itoa(roll) + "\n"
+		resp = append(resp, rollonce(ctx, load))
 		rolls--
 	}
 
-	if _, err := io.WriteString(w, resp); err != nil {
+	if _, err := io.WriteString(w, fmt.Sprintf("%v", resp)); err != nil {
 		log.Printf("Write failed: %v\n", err)
 	}
 }
@@ -49,11 +61,12 @@ func rolldice(w http.ResponseWriter, r *http.Request) {
 func rollonce(ctx context.Context, load string) int {
 
 	if strings.Contains(load, "C") {
-		arr := make([]int, 1_000_000)
-		for i := range arr {
-			arr[i] = 1_000_000 - i
+		arr := arrPool.Get().([]int)
+		for i := 0; i < elementsCount; i++ {
+			arr[i] = elementsCount - i
 		}
-		sort.Ints(arr)
+		slices.Sort(arr)
+		arrPool.Put(arr)
 	}
 
 	if strings.Contains(load, "E") {
@@ -64,7 +77,10 @@ func rollonce(ctx context.Context, load string) int {
 			return 0
 		}
 
-		client := http.Client{Timeout: time.Duration(1) * time.Second}
+		client := http.Client{
+			Timeout:   time.Duration(1) * time.Second,
+			Transport: otelhttp.NewTransport(http.DefaultTransport),
+		}
 		res, err := client.Do(req)
 		if err != nil {
 			log.Printf("Get failed: %v\n", err)
@@ -74,8 +90,22 @@ func rollonce(ctx context.Context, load string) int {
 	}
 
 	if strings.Contains(load, "D") {
+		driverName, err := otelsql.Register("mysql",
+			otelsql.AllowRoot(),
+			otelsql.TraceQueryWithoutArgs(),
+			otelsql.TracePing(),
+			otelsql.TraceRowsNext(),
+			otelsql.TraceRowsClose(),
+			otelsql.TraceRowsAffected(),
+			otelsql.TraceLastInsertID(),
+			otelsql.WithDatabaseName("my_database"), // Optional.
+		)
+		if err != nil {
+			panic(err.Error())
+		}
+
 		dsn := "root:@tcp(pinba:3306)/pinba"
-		db, err := sql.Open("mysql", dsn)
+		db, err := sql.Open(driverName, dsn)
 		if err != nil {
 			panic(err.Error())
 		}

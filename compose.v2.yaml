@@ -32,7 +32,7 @@ services:
   go-service:
     build:
       context: go-service
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.v2
     privileged: true
     pid: "host"
 
@@ -46,28 +46,28 @@ services:
       - OTEL_PROPAGATORS=tracecontext,baggage
 
 
-
-  go-auto:
-    depends_on:
-      - go-service
-      - otel-collector
-    image: otel/autoinstrumentation-go
-#    build:
-#      context: otel-go
-#      dockerfile: Dockerfile
-    privileged: true
-    pid: "host"
-    environment:
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
-      - OTEL_GO_AUTO_TARGET_EXE=/go/dice
-      - OTEL_GO_AUTO_INCLUDE_DB_STATEMENT=true
-      - OTEL_GO_AUTO_PARSE_DB_STATEMENT=true
-      - OTEL_SERVICE_NAME=mygo-service
-      - OTEL_PROPAGATORS=tracecontext,baggage
-      - OTEL_LOG_LEVEL=info
-      - CGO_ENABLED=1
-    volumes:
-      - /proc:/host/proc
+#
+#  go-auto:
+#    depends_on:
+#      - go-service
+#      - otel-collector
+#    image: otel/autoinstrumentation-go
+##    build:
+##      context: otel-go
+##      dockerfile: Dockerfile
+#    privileged: true
+#    pid: "host"
+#    environment:
+#      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+#      - OTEL_GO_AUTO_TARGET_EXE=/go/dice
+#      - OTEL_GO_AUTO_INCLUDE_DB_STATEMENT=true
+#      - OTEL_GO_AUTO_PARSE_DB_STATEMENT=true
+#      - OTEL_SERVICE_NAME=mygo-service
+#      - OTEL_PROPAGATORS=tracecontext,baggage
+#      - OTEL_LOG_LEVEL=info
+#      - CGO_ENABLED=1
+#    volumes:
+#      - /proc:/host/proc
 
   php-composer:
     image: composer/composer:latest
