@@ -11,7 +11,7 @@ use Monolog\Handler\StreamHandler;
 require __DIR__ . '/../vendor/autoload.php';
 
 require('dice.php');
-//require('otel.php');
+require('otel.php');
 
 
 $logger = new Logger('dice-server');
@@ -22,7 +22,10 @@ $app = AppFactory::create();
 $dice = new Dice();
 
 $handler = function (Request $request, Response $response) use ($logger, $dice) {
+//    pinba_script_name_set($request->getUri()->getPath());
+
     $params = $request->getQueryParams();
+    
 
     $rolls = 1;
     if(isset($params['rolls'])) {
